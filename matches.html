@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Just Tennis Season 4 - Matches</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif; line-height: 1.6;
+            margin: 0; padding: 20px; padding-top: 70px;
+            color: #333; background-color: #f5f7fa;
+        }
+        h1 { color: #2c5282; border-bottom: 3px solid #2c5282; padding-bottom: 10px; margin-bottom: 5px; }
+        
+        .nav-tabs {
+            display: flex; gap: 5px; margin-bottom: 20px; flex-wrap: wrap;
+            position: fixed; top: 0; left: 0; right: 0;
+            background-color: #f5f7fa; padding: 15px 20px; z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .nav-tab {
+            padding: 10px 20px; background-color: #e2e8f0; color: #4a5568;
+            text-decoration: none; border-radius: 8px 8px 0 0; font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .nav-tab:hover { background-color: #cbd5e0; }
+        .nav-tab.active { background-color: #2c5282; color: white; }
+
+        .controls {
+            background: white; padding: 15px; border-radius: 8px;
+            margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .controls-row { display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; }
+        .filter-group { display: flex; flex-direction: column; flex: 1; min-width: 200px; }
+        .filter-group label { font-size: 12px; font-weight: bold; color: #4a5568; margin-bottom: 4px; }
+        .filter-group input, .filter-group select { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 4px; }
+
+        .reset-btn {
+            padding: 10px 16px; background-color: #fc8181; color: white;
+            border: none; border-radius: 4px; cursor: pointer; font-weight: bold;
+        }
+        .results-count { padding: 10px; font-weight: bold; color: #2c5282; }
+
+        .table-container { background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th { background-color: #2c5282; color: white; padding: 12px 10px; text-align: left; white-space: nowrap; }
+        td { border-bottom: 1px solid #e2e8f0; padding: 12px 10px; }
+        tr:hover { background-color: #f7fafc; }
+        
+        .winner { color: #276749; font-weight: bold; }
+        .loser { color: #c53030; }
+        .score { font-family: monospace; font-size: 15px; font-weight: bold; color: #2c5282; }
+    </style>
+</head>
+<body>
+
+<nav class="nav-tabs">
+    <a href="index.html" class="nav-tab">Contact List</a>
+    <a href="ladder.html" class="nav-tab">Ladder</a>
+    <a href="matches.html" class="nav-tab active">Matches</a>
+    <a href="report-match.html" class="nav-tab">Report Score</a>
+    <a href="rules.html" class="nav-tab">Rules</a>
+</nav>
+
+<h1>🎾 Matches</h1>
+
+<div class="controls">
+    <div class="controls-row">
+        <div class="filter-group" style="flex: 2;">
+            <label>Filter by Player (Type name)</label>
+            <input list="playerOptions" id="playerInput" placeholder="Type name to search..." autocomplete="off">
+            <datalist id="playerOptions">
+                </datalist>
+        </div>
+        
+        <div class="filter-group">
+            <label>Result</label>
+            <select id="resultFilter" onchange="applyFilters()">
+                <option value="all">All Matches</option>
+                <option value="wins">Won</option>
+                <option value="losses">Lost</option>
+            </select>
+        </div>
+        
+        <button class="reset-btn" onclick="clearFilters()">Clear</button>
+        <div class="results-count"><span id="resultCount">0</span> matches</div>
+    </div>
+</div>
+
+<div class="table-container">
+    <table id="matchesTable">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Winner</th>
+                <th>Score</th>
+                <th>Loser</th>
+            </tr>
+        </thead>
+        <tbody id="matchesBody">
+            <tr><td colspan="4" style="padding:20px; text-align:center;">Loading...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    // CORRECT API KEY
+    const SUPABASE_URL = 'https://bykttkozszstkkxtdeza.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ5a3R0a296c3pzdGtreHRkZXphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYyNjg4MTIsImV4cCI6MjA1MTg0NDgxMn0.8WpvP2QGpJVcaL_fKABjMtDRbnKL2-j4KwRsYyGi6XQ';
+    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let allMatches = [];
+    let playerMap = {}; 
+
+    async function init() {
+        const { data: players } = await db.from('players').select('id, name').eq('is_active', true).order('name');
+        const datalist = document.getElementById('playerOptions');
+        players.forEach(p => {
+            const option = document.createElement('option');
+            option.value = p.name;
+            datalist.appendChild(option);
+            playerMap[p.name] = p.id;
+        });
+
+        const { data: matches, error } = await db
+            .from('matches')
+            .select(`*, winner:winner_id(name), p1:player_a_id(name), p2:player_b_id(name)`)
+            .order('date', { ascending: false });
+
+        if (!error) {
+            allMatches = matches;
+            renderMatches(matches);
+        }
+    }
+
+    const playerInput = document.getElementById('playerInput');
+    playerInput.addEventListener('input', applyFilters);
+
+    function applyFilters() {
+        const nameInput = playerInput.value;
+        const resultType = document.getElementById('resultFilter').value;
+        const selectedId = playerMap[nameInput]; 
+        
+        let filtered = allMatches;
+
+        if (nameInput) {
+            if (selectedId) {
+                filtered = filtered.filter(m => m.player_a_id === selectedId || m.player_b_id === selectedId);
+                if (resultType === 'wins') filtered = filtered.filter(m => m.winner_id === selectedId);
+                if (resultType === 'losses') filtered = filtered.filter(m => m.winner_id !== selectedId);
+            } else {
+                const term = nameInput.toLowerCase();
+                filtered = filtered.filter(m => 
+                    m.p1.name.toLowerCase().includes(term) || m.p2.name.toLowerCase().includes(term)
+                );
+            }
+        }
+        renderMatches(filtered);
+    }
+
+    function renderMatches(matches) {
+        const tbody = document.getElementById('matchesBody');
+        document.getElementById('resultCount').textContent = matches.length;
+
+        if (matches.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:20px;">No matches found</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = matches.map(m => {
+            const winnerName = m.winner.name;
+            const isA_Winner = m.player_a_id === m.winner_id;
+            const loserName = isA_Winner ? m.p2.name : m.p1.name;
+            const wSets = isA_Winner ? m.player_a_sets : m.player_b_sets;
+            const lSets = isA_Winner ? m.player_b_sets : m.player_a_sets;
+            const dateStr = new Date(m.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'});
+
+            return `
+                <tr>
+                    <td>${dateStr}</td>
+                    <td class="winner">${winnerName}</td>
+                    <td class="score">${wSets} - ${lSets}</td>
+                    <td class="loser">${loserName}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function clearFilters() {
+        playerInput.value = '';
+        document.getElementById('resultFilter').value = 'all';
+        renderMatches(allMatches);
+    }
+
+    init();
+</script>
+</body>
+</html>
