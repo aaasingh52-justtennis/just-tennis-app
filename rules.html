@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Just Tennis Season 4 - Rules</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            padding-top: 70px; /* Space for sticky nav */
+            color: #333;
+            background-color: #f5f7fa;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        h1 {
+            color: #2c5282;
+            border-bottom: 3px solid #2c5282;
+            padding-bottom: 10px;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: #f5f7fa;
+            padding: 15px 20px;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .nav-tab {
+            padding: 10px 20px;
+            background-color: #e2e8f0;
+            color: #4a5568;
+            text-decoration: none;
+            border-radius: 8px 8px 0 0;
+            font-weight: bold;
+        }
+        .nav-tab:hover { background-color: #cbd5e0; }
+        .nav-tab.active { background-color: #2c5282; color: white; }
+
+        .rules-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        h2 {
+            background-color: #2c5282;
+            color: white;
+            padding: 10px 15px;
+            margin: 20px -20px 0 -20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        h2:first-child { margin-top: 0; }
+        h2::after { content: '▼'; font-size: 14px; }
+        h2.collapsed::after { content: '▶'; }
+        
+        .section-content {
+            padding: 15px 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        
+        /* Inner collapsible */
+        .collapsible-header {
+            background-color: #e2e8f0;
+            padding: 8px 12px;
+            margin: 10px 0;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .collapsible-header::after { content: '▼'; }
+        .collapsible-header.collapsed::after { content: '▶'; }
+        
+        .collapsible-body {
+            padding: 10px;
+            background-color: #f8fafc;
+            border-left: 3px solid #e2e8f0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        ul { margin-bottom: 15px; }
+        li { margin-bottom: 5px; }
+        .controls { margin-bottom: 15px; text-align: right; }
+        button {
+            padding: 5px 10px;
+            cursor: pointer;
+            background-color: #edf2f7;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+        }
+        button:hover { background-color: #e2e8f0; }
+    </style>
+</head>
+<body>
+
+<nav class="nav-tabs">
+    <a href="index.html" class="nav-tab">Contact List</a>
+    <a href="ladder.html" class="nav-tab">Ladder</a>
+    <a href="matches.html" class="nav-tab">Matches</a>
+    <a href="report-match.html" class="nav-tab">Report Score</a>
+    <a href="rules.html" class="nav-tab active">Rules</a>
+</nav>
+
+<h1>📜 Just Tennis Season 4 Rules</h1>
+
+<div class="controls">
+    <button onclick="expandAll()">Expand All</button>
+    <button onclick="collapseAll()">Collapse All</button>
+</div>
+
+<div class="rules-container">
+
+    <h2 onclick="toggleSection(this)">1. Introduction</h2>
+    <div class="section-content">
+        <p><strong>Just Tennis</strong> is a free, mixed-gender community tennis league based in Dubai. The season runs from <strong>January 1, 2026</strong> to <strong>April 1, 2026</strong>.</p>
+        <p>The league is designed to be flexible, friendly, and competitive. There are no fixed match times; players arrange matches themselves.</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">2. Format & Scoring</h2>
+    <div class="section-content">
+        <h3>Match Format</h3>
+        <ul>
+            <li>Matches are typically <strong>Best of 3 Sets</strong>.</li>
+            <li>Players can agree to play a Pro Set (First to 8 or 10) if time is limited.</li>
+            <li>If court time expires, the score at that moment stands (or players can agree to finish later).</li>
+        </ul>
+
+        <h3>Points System</h3>
+        <ul>
+            <li><strong>1 point</strong> for playing (Participation).</li>
+            <li><strong>1 point</strong> for each set won.</li>
+            <li><strong>2 points</strong> bonus for winning the match.</li>
+            <li><strong>Max Points:</strong> 5 points per match.</li>
+        </ul>
+        <p><em>Example: A 2-1 win gives the winner 5 points (1+2+2) and the loser 2 points (1+1).</em></p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">3. Scheduling & Locations</h2>
+    <div class="section-content">
+        <p>Players are responsible for contacting opponents via WhatsApp to arrange matches.</p>
+        <p><strong>Courts:</strong> Matches can be played at any court in Dubai. Court fees are shared 50/50 unless one player offers free access.</p>
+        
+        <div class="collapsible-header collapsed" onclick="toggleSubsection(this)">
+            Detailed Transfer / Cancellation Policy
+        </div>
+        <div class="collapsible-body" style="max-height: 0px;">
+            <p>If a player cancels a booked court less than 24 hours in advance, they are responsible for the full court fee.</p>
+            <p>If a player is more than 20 minutes late, the opponent can claim a walkover win (recorded as a 2-0 win).</p>
+        </div>
+    </div>
+
+    <h2 onclick="toggleSection(this)">4. Rankings & Playoffs</h2>
+    <div class="section-content">
+        <p><strong>Rankings are based on:</strong></p>
+        <ol>
+            <li>Total Points</li>
+            <li>Match Win Percentage</li>
+            <li>Set Win Percentage</li>
+            <li>Registration Order (Earliest joiner wins tie)</li>
+        </ol>
+        <p><strong>Playoffs:</strong> The top 16 players at the end of the season qualify for the knockout finals in April.</p>
+    </div>
+
+</div>
+
+<script>
+    function toggleSection(header) {
+        header.classList.toggle('collapsed');
+        const content = header.nextElementSibling;
+        
+        if (header.classList.contains('collapsed')) {
+            content.style.maxHeight = null;
+        } else {
+            content.style.maxHeight = "none"; // Allow unlimited height for content
+        }
+    }
+    
+    function toggleSubsection(header) {
+        header.classList.toggle('collapsed');
+        const body = header.nextElementSibling;
+        const parentSection = header.closest('.section-content');
+
+        if (header.classList.contains('collapsed')) {
+            body.style.maxHeight = null;
+        } else {
+            body.style.maxHeight = body.scrollHeight + "px";
+        }
+        
+        // Ensure parent stays open/adapts
+        if (parentSection) {
+            parentSection.style.maxHeight = "none";
+        }
+    }
+    
+    function expandAll() {
+        document.querySelectorAll('h2').forEach(h => {
+            h.classList.remove('collapsed');
+            h.nextElementSibling.style.maxHeight = "none";
+        });
+        document.querySelectorAll('.collapsible-header').forEach(h => {
+            h.classList.remove('collapsed');
+            h.nextElementSibling.style.maxHeight = h.nextElementSibling.scrollHeight + "px";
+        });
+    }
+    
+    function collapseAll() {
+        document.querySelectorAll('h2, .collapsible-header').forEach(h => h.classList.add('collapsed'));
+        document.querySelectorAll('.section-content, .collapsible-body').forEach(c => c.style.maxHeight = null);
+    }
+
+    // Expand all on load
+    expandAll();
+</script>
+
+</body>
+</html>

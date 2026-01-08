@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Just Tennis Season 4 - Contact List</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif; line-height: 1.6;
+            margin: 0; padding: 20px; padding-top: 70px;
+            color: #333; background-color: #f5f7fa;
+        }
+        h1 { color: #2c5282; border-bottom: 3px solid #2c5282; padding-bottom: 10px; margin-bottom: 5px; }
+        .subtitle { color: #666; margin-bottom: 20px; }
+        
+        /* Sticky Navigation */
+        .nav-tabs {
+            display: flex; gap: 5px; margin-bottom: 20px; flex-wrap: wrap;
+            position: fixed; top: 0; left: 0; right: 0;
+            background-color: #f5f7fa; padding: 15px 20px; z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .nav-tab {
+            padding: 10px 20px; background-color: #e2e8f0; color: #4a5568;
+            text-decoration: none; border-radius: 8px 8px 0 0; font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .nav-tab:hover { background-color: #cbd5e0; }
+        .nav-tab.active { background-color: #2c5282; color: white; }
+
+        /* Controls */
+        .controls {
+            background: white; padding: 15px; border-radius: 8px;
+            margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .controls-row {
+            display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end;
+        }
+        .filter-group { display: flex; flex-direction: column; min-width: 140px; flex: 1; }
+        .filter-group label {
+            font-size: 12px; font-weight: bold; color: #4a5568; margin-bottom: 4px;
+        }
+        .filter-group select, .filter-group input {
+            padding: 8px 10px; border: 1px solid #cbd5e0; border-radius: 4px; font-size: 14px; width: 100%;
+        }
+        .reset-btn {
+            padding: 8px 16px; background-color: #fc8181; color: white;
+            border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; height: 35px;
+        }
+        .reset-btn:hover { background-color: #f56565; }
+        .results-count {
+            padding: 8px 16px; background-color: #ebf8ff; border-radius: 4px;
+            font-size: 14px; color: #2c5282; font-weight: bold; display: flex; align-items: center; height: 35px;
+        }
+
+        /* Table */
+        .table-container {
+            background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow-x: auto;
+        }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th {
+            background-color: #2c5282; color: white; padding: 12px 10px;
+            text-align: left; position: sticky; top: 0; cursor: pointer; white-space: nowrap;
+        }
+        th small { font-weight: normal; opacity: 0.8; display: block; font-size: 11px; }
+        td { border-bottom: 1px solid #e2e8f0; padding: 10px; }
+        tr:hover { background-color: #f7fafc; }
+        tr.hidden { display: none; }
+        
+        /* Badges */
+        .whatsapp-link { color: #25D366; text-decoration: none; font-weight: bold; }
+        .level-badge { padding: 3px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; display: inline-block; }
+        .level-expert { background-color: #ffd700; color: #744210; }
+        .level-advanced { background-color: #c6f6d5; color: #276749; }
+        .level-upper-intermediate { background-color: #bee3f8; color: #2c5282; }
+        .level-intermediate { background-color: #fefcbf; color: #975a16; }
+        .level-lower-intermediate { background-color: #fed7aa; color: #c05621; }
+        .level-improver { background-color: #e9d8fd; color: #553c9a; }
+        .level-beginner { background-color: #fed7d7; color: #c53030; }
+        .zone-badge { padding: 2px 8px; border-radius: 4px; font-size: 12px; background-color: #edf2f7; color: #4a5568; }
+
+        @media (max-width: 768px) {
+            .filter-group { min-width: 45%; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="nav-tabs">
+    <a href="index.html" class="nav-tab active">Contact List</a>
+    <a href="ladder.html" class="nav-tab">Ladder</a>
+    <a href="matches.html" class="nav-tab">Matches</a>
+    <a href="report-match.html" class="nav-tab">Report Score</a>
+    <a href="rules.html" class="nav-tab">Rules</a>
+</nav>
+
+<h1>🎾 Just Tennis Season 4 - Contact List</h1>
+<p class="subtitle">January 1 - April 1, 2026</p>
+
+<div class="controls">
+    <div class="controls-row">
+        <div class="filter-group" style="min-width: 200px;">
+            <label>Search Name</label>
+            <input type="text" id="filterName" placeholder="Type name...">
+        </div>
+        <div class="filter-group" style="min-width: 200px;">
+            <label>Search Area</label>
+            <input type="text" id="filterArea" placeholder="e.g. Marina, Hills...">
+        </div>
+        
+        <div class="filter-group">
+            <label>Level</label>
+            <select id="filterLevel">
+                <option value="">All Levels</option>
+                <option value="Expert">Expert</option>
+                <option value="Advanced">Advanced</option>
+                <option value="Upper Intermediate">Upper Intermediate</option>
+                <option value="Intermediate">Intermediate</option>
+                <option value="Lower Intermediate">Lower Intermediate</option>
+                <option value="Improver">Improver</option>
+                <option value="Beginner">Beginner</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Metro Zone</label>
+            <select id="filterZone">
+                <option value="">All Zones</option>
+                <option value="Zone 1">Zone 1</option>
+                <option value="Zone 2">Zone 2</option>
+                <option value="Zone 3">Zone 3</option>
+                <option value="Zone 4">Zone 4</option>
+                <option value="Zone 5">Zone 5</option>
+                <option value="Zone 6">Zone 6</option>
+                <option value="Zone 7">Zone 7</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Max Budget</label>
+            <select id="filterBudget">
+                <option value="">Any Budget</option>
+                <option value="< 50 AED">&lt; 50 AED</option>
+                <option value="50 - 100 AED">50 - 100 AED</option>
+                <option value="100 - 150 AED">100 - 150 AED</option>
+                <option value="> 150 AED">&gt; 150 AED</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Preferred Time</label>
+            <select id="filterTime">
+                <option value="">Any Time</option>
+                <option value="Morning">Morning</option>
+                <option value="Afternoon">Afternoon</option>
+                <option value="Evening">Evening</option>
+                <option value="Flexible">Flexible</option>
+            </select>
+        </div>
+        
+        <button class="reset-btn" onclick="resetFilters()">Reset Filters</button>
+        <div class="results-count"><span id="resultCount">0</span> players found</div>
+    </div>
+</div>
+
+<div class="table-container">
+    <div id="loadingMessage" style="padding:40px; text-align:center; color:#666;">Loading players...</div>
+    <div id="errorMessage" style="padding:40px; text-align:center; color:red; display:none;"></div>
+    
+    <table id="contactTable" style="display: none;">
+        <thead>
+            <tr>
+                <th onclick="sortTable(0)">ID ↕</th>
+                <th onclick="sortTable(1)">Name ↕</th>
+                <th>WhatsApp</th>
+                <th onclick="sortTable(3)">Level ↕</th>
+                <th onclick="sortTable(4)">Metro Zone ↕</th>
+                <th onclick="sortTable(5)">Preferred Area/s ↕</th>
+                <th onclick="sortTable(6)">Max Court Budget<br><small>(per person / match)</small> ↕</th>
+                <th onclick="sortTable(7)">Free Court? ↕</th>
+                <th onclick="sortTable(8)">Days ↕</th>
+                <th onclick="sortTable(9)">Times ↕</th>
+            </tr>
+        </thead>
+        <tbody id="playerTableBody"></tbody>
+    </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const SUPABASE_URL = 'https://bykttkozszstkkxtdeza.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ5a3R0a296c3pzdGtreHRkZXphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYyNjg4MTIsImV4cCI6MjA1MTg0NDgxMn0.8WpvP2QGpJVcaL_fKABjMtDRbnKL2-j4KwRsYyGi6XQ';
+    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    let allPlayers = [];
+
+    function getLevelClass(level) {
+        const map = {
+            'Expert': 'level-expert', 'Advanced': 'level-advanced', 'Upper Intermediate': 'level-upper-intermediate',
+            'Intermediate': 'level-intermediate', 'Lower Intermediate': 'level-lower-intermediate',
+            'Improver': 'level-improver', 'Beginner': 'level-beginner'
+        };
+        return map[level] || 'level-intermediate';
+    }
+
+    async function loadPlayers() {
+        try {
+            const { data, error } = await db.from('players').select('*').eq('is_active', true).order('id');
+            if (error) throw error;
+            
+            allPlayers = data;
+            renderTable(allPlayers);
+        } catch (err) {
+            document.getElementById('loadingMessage').style.display = 'none';
+            document.getElementById('errorMessage').textContent = 'Error loading players. Refresh page.';
+            document.getElementById('errorMessage').style.display = 'block';
+        }
+    }
+
+    function renderTable(players) {
+        const tbody = document.getElementById('playerTableBody');
+        tbody.innerHTML = players.map(p => {
+            let waLink = p.whatsapp || '#';
+            // Basic sanitization: if it's just a number, prepend wa.me
+            if (waLink !== '#' && !waLink.startsWith('http')) {
+                waLink = `https://wa.me/${p.whatsapp.replace(/[^0-9]/g, '')}`;
+            }
+
+            return `
+            <tr data-level="${p.level}" data-zone="${p.metro_zone}" 
+                data-budget="${p.max_budget}" data-times="${p.preferred_times}">
+                <td>${p.id}</td>
+                <td>${p.name}</td>
+                <td><a href="${waLink}" target="_blank" class="whatsapp-link">💬 Chat</a></td>
+                <td><span class="level-badge ${getLevelClass(p.level)}">${p.level}</span></td>
+                <td><span class="zone-badge">${p.metro_zone}</span></td>
+                <td>${p.preferred_areas || '-'}</td>
+                <td>${p.max_budget}</td>
+                <td>${p.free_court_access ? '<span style="color:green;font-weight:bold">Yes</span>' : '<span style="color:#c53030">No</span>'}</td>
+                <td>${p.preferred_days}</td>
+                <td>${p.preferred_times}</td>
+            </tr>`;
+        }).join('');
+
+        document.getElementById('loadingMessage').style.display = 'none';
+        document.getElementById('contactTable').style.display = 'table';
+        updateCount();
+    }
+
+    function applyFilters() {
+        const nameFilter = document.getElementById('filterName').value.toLowerCase();
+        const areaFilter = document.getElementById('filterArea').value.toLowerCase();
+        const levelFilter = document.getElementById('filterLevel').value;
+        const zoneFilter = document.getElementById('filterZone').value;
+        const budgetFilter = document.getElementById('filterBudget').value;
+        const timeFilter = document.getElementById('filterTime').value;
+
+        const rows = document.querySelectorAll('#playerTableBody tr');
+        let count = 0;
+
+        rows.forEach(row => {
+            const name = row.children[1].textContent.toLowerCase();
+            const areas = row.children[5].textContent.toLowerCase();
+            const level = row.dataset.level;
+            const zone = row.dataset.zone;
+            const budget = row.dataset.budget;
+            const times = row.dataset.times; 
+
+            const matchesName = name.includes(nameFilter);
+            const matchesArea = areas.includes(areaFilter);
+            const matchesLevel = !levelFilter || level === levelFilter;
+            const matchesZone = !zoneFilter || zone === zoneFilter;
+            const matchesBudget = !budgetFilter || budget === budgetFilter;
+            const matchesTime = !timeFilter || times.includes(timeFilter);
+
+            if (matchesName && matchesArea && matchesLevel && matchesZone && matchesBudget && matchesTime) {
+                row.classList.remove('hidden');
+                count++;
+            } else {
+                row.classList.add('hidden');
+            }
+        });
+        document.getElementById('resultCount').textContent = count;
+    }
+
+    function updateCount() {
+        const visible = document.querySelectorAll('#playerTableBody tr:not(.hidden)').length;
+        document.getElementById('resultCount').textContent = visible;
+    }
+
+    function resetFilters() {
+        document.querySelectorAll('input, select').forEach(el => el.value = '');
+        applyFilters();
+    }
+
+    ['filterName', 'filterArea'].forEach(id => document.getElementById(id).addEventListener('input', applyFilters));
+    ['filterLevel', 'filterZone', 'filterBudget', 'filterTime'].forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
+
+    let sortAsc = true;
+    function sortTable(colIndex) {
+        const tbody = document.getElementById('playerTableBody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        sortAsc = !sortAsc;
+        
+        rows.sort((a, b) => {
+            const tA = a.children[colIndex].textContent;
+            const tB = b.children[colIndex].textContent;
+            if (colIndex === 0) return sortAsc ? tA - tB : tB - tA; // ID Sort
+            return sortAsc ? tA.localeCompare(tB) : tB.localeCompare(tA);
+        });
+        rows.forEach(r => tbody.appendChild(r));
+    }
+
+    loadPlayers();
+</script>
+</body>
+</html>
