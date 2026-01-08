@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Just Tennis Season 4 - Report Score</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif; line-height: 1.6;
+            margin: 0; padding: 20px; padding-top: 70px;
+            color: #333; background-color: #f5f7fa;
+        }
+        h1 { color: #2c5282; border-bottom: 3px solid #2c5282; padding-bottom: 10px; margin-bottom: 20px; }
+        
+        .nav-tabs {
+            display: flex; gap: 5px; margin-bottom: 20px; flex-wrap: wrap;
+            position: fixed; top: 0; left: 0; right: 0;
+            background-color: #f5f7fa; padding: 15px 20px; z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .nav-tab {
+            padding: 10px 20px; background-color: #e2e8f0; color: #4a5568;
+            text-decoration: none; border-radius: 8px 8px 0 0; font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .nav-tab:hover { background-color: #cbd5e0; }
+        .nav-tab.active { background-color: #2c5282; color: white; }
+
+        .form-container {
+            background: white; padding: 25px; border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-width: 600px; margin: 0 auto;
+        }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: bold; margin-bottom: 8px; color: #4a5568; }
+        select, input {
+            width: 100%; padding: 10px; border: 1px solid #cbd5e0;
+            border-radius: 4px; font-size: 16px;
+        }
+        .score-row { display: flex; gap: 15px; align-items: center; }
+        .vs-badge { font-weight: bold; color: #2c5282; font-size: 14px; }
+        
+        button.submit-btn {
+            width: 100%; padding: 12px; background-color: #48bb78; color: white;
+            border: none; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer;
+        }
+        button.submit-btn:hover { background-color: #38a169; }
+        
+        .error-msg { color: #c53030; background: #fff5f5; padding: 10px; border-radius: 4px; margin-bottom: 15px; display: none; }
+        .success-msg { color: #276749; background: #f0fff4; padding: 10px; border-radius: 4px; margin-bottom: 15px; display: none; }
+    </style>
+</head>
+<body>
+
+<nav class="nav-tabs">
+    <a href="index.html" class="nav-tab">Contact List</a>
+    <a href="ladder.html" class="nav-tab">Ladder</a>
+    <a href="matches.html" class="nav-tab">Matches</a>
+    <a href="report-match.html" class="nav-tab active">Report Score</a>
+    <a href="rules.html" class="nav-tab">Rules</a>
+</nav>
+
+<h1>📝 Report Match Result</h1>
+
+<div class="form-container">
+    <div id="errorMessage" class="error-msg"></div>
+    <div id="successMessage" class="success-msg">
+        Match reported successfully! <a href="matches.html">View Matches</a>
+    </div>
+
+    <form id="matchForm">
+        <div class="form-group">
+            <label>Date Played</label>
+            <input type="date" id="matchDate" required>
+        </div>
+
+        <div class="form-group">
+            <label>Winner</label>
+            <select id="winnerSelect" required>
+                <option value="">Select Winner...</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Loser</label>
+            <select id="loserSelect" required>
+                <option value="">Select Loser...</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Score (Sets Won)</label>
+            <div class="score-row">
+                <div style="flex:1">
+                    <label style="font-size:12px">Winner Sets</label>
+                    <input type="number" id="winnerSets" min="0" max="3" value="2" required>
+                </div>
+                <span class="vs-badge">-</span>
+                <div style="flex:1">
+                    <label style="font-size:12px">Loser Sets</label>
+                    <input type="number" id="loserSets" min="0" max="2" value="0" required>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>League PIN (Security)</label>
+            <input type="password" id="leaguePin" placeholder="Enter PIN to submit" required>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">Submit Result</button>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    // CORRECT API KEY
+    const SUPABASE_URL = 'https://bykttkozszstkkxtdeza.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ5a3R0a296c3pzdGtreHRkZXphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYyNjg4MTIsImV4cCI6MjA1MTg0NDgxMn0.8WpvP2QGpJVcaL_fKABjMtDRbnKL2-j4KwRsYyGi6XQ';
+    const LEAGUE_PIN = "2026"; 
+
+    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let allPlayers = [];
+
+    async function init() {
+        document.getElementById('matchDate').valueAsDate = new Date();
+        try {
+            const { data, error } = await db.from('players').select('id, name').eq('is_active', true).order('name');
+            if (error) throw error;
+            allPlayers = data;
+            populateDropdowns();
+        } catch (err) {
+            showError('Failed to load players: ' + err.message);
+        }
+    }
+
+    function populateDropdowns() {
+        const winnerSelect = document.getElementById('winnerSelect');
+        const loserSelect = document.getElementById('loserSelect');
+        const createOption = (p) => `<option value="${p.id}">${p.name}</option>`;
+        const optionsHtml = '<option value="">Select Player...</option>' + allPlayers.map(createOption).join('');
+        winnerSelect.innerHTML = optionsHtml;
+        loserSelect.innerHTML = optionsHtml;
+    }
+
+    function handlePlayerChange(changedSelect, otherSelect) {
+        const selectedId = changedSelect.value;
+        Array.from(otherSelect.options).forEach(opt => {
+            opt.disabled = (opt.value === selectedId && selectedId !== "");
+        });
+    }
+
+    document.getElementById('winnerSelect').addEventListener('change', (e) => handlePlayerChange(e.target, document.getElementById('loserSelect')));
+    document.getElementById('loserSelect').addEventListener('change', (e) => handlePlayerChange(e.target, document.getElementById('winnerSelect')));
+
+    document.getElementById('matchForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        hideMessages();
+
+        if (document.getElementById('leaguePin').value !== LEAGUE_PIN) {
+            showError("Incorrect League PIN.");
+            return;
+        }
+
+        const winnerId = parseInt(document.getElementById('winnerSelect').value);
+        const loserId = parseInt(document.getElementById('loserSelect').value);
+        const winnerSets = parseInt(document.getElementById('winnerSets').value);
+        const loserSets = parseInt(document.getElementById('loserSets').value);
+        const date = document.getElementById('matchDate').value;
+
+        if (winnerId === loserId) {
+            showError("Winner and Loser cannot be the same.");
+            return;
+        }
+
+        let player_a_id, player_b_id, player_a_sets, player_b_sets;
+
+        if (winnerId < loserId) {
+            player_a_id = winnerId;
+            player_b_id = loserId;
+            player_a_sets = winnerSets;
+            player_b_sets = loserSets;
+        } else {
+            player_a_id = loserId;
+            player_b_id = winnerId;
+            player_a_sets = loserSets;
+            player_b_sets = winnerSets;
+        }
+
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Submitting...";
+
+        try {
+            const { error } = await db.from('matches').insert({
+                date: date,
+                player_a_id: player_a_id,
+                player_b_id: player_b_id,
+                player_a_sets: player_a_sets,
+                player_b_sets: player_b_sets,
+                winner_id: winnerId,
+                season_id: 1 
+            });
+
+            if (error) throw error;
+
+            document.getElementById('successMessage').style.display = 'block';
+            document.getElementById('matchForm').reset();
+            document.getElementById('matchDate').valueAsDate = new Date();
+            populateDropdowns();
+
+        } catch (err) {
+            if (err.code === '23505') {
+                showError("This match (same players on same date) already exists.");
+            } else {
+                showError(err.message);
+            }
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Submit Result";
+        }
+    });
+
+    function showError(msg) {
+        const el = document.getElementById('errorMessage');
+        el.textContent = msg;
+        el.style.display = 'block';
+    }
+
+    function hideMessages() {
+        document.getElementById('errorMessage').style.display = 'none';
+        document.getElementById('successMessage').style.display = 'none';
+    }
+
+    init();
+</script>
+</body>
+</html>
