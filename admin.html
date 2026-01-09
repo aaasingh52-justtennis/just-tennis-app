@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Just Tennis - Admin</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            padding-top: 70px;
+            color: #333;
+            background-color: #f5f7fa;
+        }
+        h1 {
+            color: #2c5282;
+            border-bottom: 3px solid #2c5282;
+            padding-bottom: 10px;
+            margin-bottom: 5px;
+        }
+        h2 {
+            color: #4a5568;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        /* Sticky Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: #f5f7fa;
+            padding: 15px 20px;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .nav-tab {
+            padding: 10px 20px;
+            background-color: #e2e8f0;
+            color: #4a5568;
+            text-decoration: none;
+            border-radius: 8px 8px 0 0;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .nav-tab:hover {
+            background-color: #cbd5e0;
+        }
+        .nav-tab.active {
+            background-color: #2c5282;
+            color: white;
+        }
+        
+        /* Password Gate */
+        .password-gate {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 400px;
+            margin: 50px auto;
+            text-align: center;
+        }
+        .password-gate h2 {
+            margin-top: 0;
+        }
+        .password-gate input {
+            padding: 10px 15px;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            font-size: 16px;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        .password-gate button {
+            padding: 10px 30px;
+            background-color: #2c5282;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .password-gate button:hover {
+            background-color: #2a4365;
+        }
+        .password-error {
+            color: #c53030;
+            margin-top: 10px;
+        }
+        
+        /* Admin Content */
+        .admin-content {
+            display: none;
+        }
+        .admin-content.visible {
+            display: block;
+        }
+        
+        /* Form Styles */
+        .form-card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: flex-end;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 200px;
+            flex: 1;
+        }
+        .form-group.small {
+            min-width: 80px;
+            flex: 0;
+        }
+        .form-group label {
+            font-size: 13px;
+            font-weight: bold;
+            color: #4a5568;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            padding: 10px 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+        }
+        .form-group input[type="number"] {
+            width: 70px;
+        }
+        .vs-text {
+            font-weight: bold;
+            color: #4a5568;
+            padding: 10px 5px;
+            font-size: 16px;
+        }
+        .submit-btn {
+            padding: 12px 30px;
+            background-color: #48bb78;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .submit-btn:hover {
+            background-color: #38a169;
+        }
+        .submit-btn:disabled {
+            background-color: #a0aec0;
+            cursor: not-allowed;
+        }
+        
+        /* Winner Preview */
+        .winner-preview {
+            background-color: #f0fff4;
+            border-left: 4px solid #48bb78;
+            padding: 10px 15px;
+            margin-top: 15px;
+            border-radius: 0 8px 8px 0;
+            font-size: 14px;
+            display: none;
+        }
+        .winner-preview.show {
+            display: block;
+        }
+        .winner-preview.error {
+            background-color: #fff5f5;
+            border-left-color: #fc8181;
+            color: #c53030;
+        }
+        
+        /* Messages */
+        .message {
+            padding: 12px 20px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .message.success {
+            background-color: #c6f6d5;
+            color: #276749;
+            display: block;
+        }
+        .message.error {
+            background-color: #fed7d7;
+            color: #c53030;
+            display: block;
+        }
+        
+        /* Recent Entries Table */
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        th {
+            background-color: #4a5568;
+            color: white;
+            padding: 12px 10px;
+            text-align: left;
+            white-space: nowrap;
+        }
+        td {
+            border-bottom: 1px solid #e2e8f0;
+            padding: 10px;
+        }
+        tr:hover {
+            background-color: #f7fafc;
+        }
+        .winner-name {
+            color: #276749;
+            font-weight: bold;
+        }
+        .loser-name {
+            color: #718096;
+        }
+        .score-display {
+            font-family: monospace;
+            font-size: 14px;
+            background-color: #edf2f7;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+        .delete-btn {
+            padding: 5px 12px;
+            background-color: #fc8181;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .delete-btn:hover {
+            background-color: #f56565;
+        }
+        .no-entries {
+            text-align: center;
+            padding: 30px;
+            color: #718096;
+            font-style: italic;
+        }
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: #718096;
+        }
+        
+        @media (max-width: 768px) {
+            .form-group {
+                min-width: 100%;
+            }
+            .form-group.small {
+                min-width: 45%;
+            }
+            .nav-tabs {
+                padding: 10px 15px;
+            }
+            .nav-tab {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="nav-tabs">
+    <a href="index.html" class="nav-tab">Contact List</a>
+    <a href="ladder.html" class="nav-tab">Ladder</a>
+    <a href="matches.html" class="nav-tab">Matches</a>
+    <a href="rules.html" class="nav-tab">Rules</a>
+</nav>
+
+<h1>🔐 Just Tennis - Admin</h1>
+
+<!-- Password Gate -->
+<div id="passwordGate" class="password-gate">
+    <h2>Admin Access</h2>
+    <p>Enter the admin password to continue.</p>
+    <input type="password" id="passwordInput" placeholder="Password" onkeypress="if(event.key==='Enter') checkPassword()">
+    <button onclick="checkPassword()">Enter</button>
+    <p id="passwordError" class="password-error" style="display: none;">Incorrect password</p>
+</div>
+
+<!-- Admin Content (hidden until password entered) -->
+<div id="adminContent" class="admin-content">
+    <p class="subtitle">Enter match results here. Changes update the ladder immediately.</p>
+
+    <!-- Status Messages -->
+    <div id="successMessage" class="message"></div>
+    <div id="errorMessage" class="message"></div>
+
+    <!-- Match Entry Form -->
+    <div class="form-card">
+        <h2 style="margin-top: 0;">➕ Enter Match Result</h2>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label>Player A (type to search)</label>
+                <input type="text" id="playerA" list="playerListA" placeholder="Select player..." autocomplete="off">
+                <datalist id="playerListA"></datalist>
+            </div>
+            <span class="vs-text">vs</span>
+            <div class="form-group">
+                <label>Player B (type to search)</label>
+                <input type="text" id="playerB" list="playerListB" placeholder="Select player..." autocomplete="off">
+                <datalist id="playerListB"></datalist>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group small">
+                <label>Player A Sets</label>
+                <input type="number" id="playerASets" min="0" max="5" value="0">
+            </div>
+            <span class="vs-text">-</span>
+            <div class="form-group small">
+                <label>Player B Sets</label>
+                <input type="number" id="playerBSets" min="0" max="5" value="0">
+            </div>
+            <div class="form-group" style="min-width: 150px;">
+                <label>Match Date</label>
+                <input type="date" id="matchDate">
+            </div>
+        </div>
+        
+        <div id="winnerPreview" class="winner-preview">
+            <strong>Winner:</strong> <span id="winnerName">-</span>
+        </div>
+        
+        <button id="submitBtn" class="submit-btn" onclick="submitMatch()" disabled>Submit Match</button>
+    </div>
+
+    <!-- Recent Entries -->
+    <h2>📋 Recent Entries (Last 10)</h2>
+    <p style="color: #718096; font-size: 14px;">Made a mistake? Delete the entry and re-submit.</p>
+    
+    <div class="table-container">
+        <div id="loadingRecent" class="loading">Loading recent entries...</div>
+        <div id="noEntries" class="no-entries" style="display: none;">No matches entered yet this season.</div>
+        <table id="recentTable" style="display: none;">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Winner</th>
+                    <th>Score</th>
+                    <th>Loser</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="recentTableBody">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+    // Simple password protection (not real security - just prevents casual access)
+    const ADMIN_PASSWORD = 'tennis2026';  // Change this to your preferred password
+    
+    function checkPassword() {
+        const input = document.getElementById('passwordInput').value;
+        if (input === ADMIN_PASSWORD) {
+            document.getElementById('passwordGate').style.display = 'none';
+            document.getElementById('adminContent').classList.add('visible');
+            loadData();
+        } else {
+            document.getElementById('passwordError').style.display = 'block';
+            document.getElementById('passwordInput').value = '';
+        }
+    }
+    
+    // Initialize Supabase
+    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    let allPlayers = {};
+    let playersList = [];
+    let recentMatches = [];
+    
+    // Set default date to today
+    document.getElementById('matchDate').valueAsDate = new Date();
+    
+    // Load players and recent matches
+    async function loadData() {
+        try {
+            // Load all active players
+            const { data: players, error: playersError } = await db
+                .from('players')
+                .select('id, name')
+                .eq('is_active', true)
+                .order('name');
+            
+            if (playersError) throw playersError;
+            
+            // Populate datalists
+            const datalistA = document.getElementById('playerListA');
+            const datalistB = document.getElementById('playerListB');
+            
+            players.forEach(player => {
+                allPlayers[player.id] = player.name;
+                playersList.push({ id: player.id, name: player.name });
+                
+                const optionA = document.createElement('option');
+                optionA.value = `${player.name} (#${player.id})`;
+                datalistA.appendChild(optionA);
+                
+                const optionB = document.createElement('option');
+                optionB.value = `${player.name} (#${player.id})`;
+                datalistB.appendChild(optionB);
+            });
+            
+            // Load recent matches
+            await loadRecentMatches();
+            
+        } catch (error) {
+            console.error('Error loading data:', error);
+            showMessage('error', 'Error loading player data. Please refresh the page.');
+        }
+    }
+    
+    async function loadRecentMatches() {
+        try {
+            const { data: matches, error } = await db
+                .from('matches')
+                .select('*')
+                .eq('season_id', 1)
+                .order('created_at', { ascending: false })
+                .limit(10);
+            
+            if (error) throw error;
+            
+            recentMatches = matches;
+            renderRecentMatches();
+            
+        } catch (error) {
+            console.error('Error loading recent matches:', error);
+        }
+    }
+    
+    function renderRecentMatches() {
+        const tbody = document.getElementById('recentTableBody');
+        const table = document.getElementById('recentTable');
+        const loading = document.getElementById('loadingRecent');
+        const noEntries = document.getElementById('noEntries');
+        
+        loading.style.display = 'none';
+        
+        if (recentMatches.length === 0) {
+            table.style.display = 'none';
+            noEntries.style.display = 'block';
+            return;
+        }
+        
+        noEntries.style.display = 'none';
+        table.style.display = 'table';
+        
+        tbody.innerHTML = recentMatches.map(match => {
+            const winnerName = allPlayers[match.winner_id] || `Player #${match.winner_id}`;
+            const loserId = match.player_a_id === match.winner_id ? match.player_b_id : match.player_a_id;
+            const loserName = allPlayers[loserId] || `Player #${loserId}`;
+            
+            const winnerSets = match.player_a_id === match.winner_id ? match.player_a_sets : match.player_b_sets;
+            const loserSets = match.player_a_id === match.winner_id ? match.player_b_sets : match.player_a_sets;
+            
+            const dateFormatted = new Date(match.date).toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'short'
+            });
+            
+            return `
+                <tr>
+                    <td>${dateFormatted}</td>
+                    <td class="winner-name">${winnerName}</td>
+                    <td><span class="score-display">${winnerSets} - ${loserSets}</span></td>
+                    <td class="loser-name">${loserName}</td>
+                    <td><button class="delete-btn" onclick="deleteMatch(${match.id}, '${winnerName}', '${loserName}')">🗑️ Delete</button></td>
+                </tr>
+            `;
+        }).join('');
+    }
+    
+    // Extract player ID from input value
+    function getPlayerIdFromInput(inputValue) {
+        if (!inputValue) return null;
+        
+        // Try to extract ID from "Name (#ID)" format
+        const match = inputValue.match(/#(\d+)\)?$/);
+        if (match) {
+            return parseInt(match[1]);
+        }
+        
+        // Try to find player by exact name match
+        const searchTerm = inputValue.toLowerCase().trim();
+        const foundPlayer = playersList.find(p => 
+            p.name.toLowerCase() === searchTerm
+        );
+        
+        return foundPlayer ? foundPlayer.id : null;
+    }
+    
+    // Update winner preview
+    function updateWinnerPreview() {
+        const playerAInput = document.getElementById('playerA').value;
+        const playerBInput = document.getElementById('playerB').value;
+        const playerASets = parseInt(document.getElementById('playerASets').value) || 0;
+        const playerBSets = parseInt(document.getElementById('playerBSets').value) || 0;
+        
+        const playerAId = getPlayerIdFromInput(playerAInput);
+        const playerBId = getPlayerIdFromInput(playerBInput);
+        
+        const preview = document.getElementById('winnerPreview');
+        const winnerSpan = document.getElementById('winnerName');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        // Validation checks
+        if (!playerAId || !playerBId) {
+            preview.classList.remove('show');
+            submitBtn.disabled = true;
+            return;
+        }
+        
+        if (playerAId === playerBId) {
+            preview.classList.add('show', 'error');
+            preview.classList.remove('error');
+            winnerSpan.textContent = '⚠️ Same player selected twice';
+            preview.classList.add('error');
+            submitBtn.disabled = true;
+            return;
+        }
+        
+        if (playerASets === playerBSets) {
+            preview.classList.add('show');
+            preview.classList.remove('error');
+            winnerSpan.textContent = '⚠️ Scores are tied - enter a valid result';
+            preview.classList.add('error');
+            submitBtn.disabled = true;
+            return;
+        }
+        
+        // Determine winner
+        const winnerId = playerASets > playerBSets ? playerAId : playerBId;
+        const winnerName = allPlayers[winnerId];
+        
+        preview.classList.add('show');
+        preview.classList.remove('error');
+        winnerSpan.textContent = `${winnerName} (${Math.max(playerASets, playerBSets)}-${Math.min(playerASets, playerBSets)})`;
+        submitBtn.disabled = false;
+    }
+    
+    // Add event listeners for real-time preview
+    document.getElementById('playerA').addEventListener('input', updateWinnerPreview);
+    document.getElementById('playerB').addEventListener('input', updateWinnerPreview);
+    document.getElementById('playerASets').addEventListener('input', updateWinnerPreview);
+    document.getElementById('playerBSets').addEventListener('input', updateWinnerPreview);
+    
+    // Submit match
+    async function submitMatch() {
+        const playerAInput = document.getElementById('playerA').value;
+        const playerBInput = document.getElementById('playerB').value;
+        const playerASets = parseInt(document.getElementById('playerASets').value) || 0;
+        const playerBSets = parseInt(document.getElementById('playerBSets').value) || 0;
+        const matchDate = document.getElementById('matchDate').value;
+        
+        const playerAId = getPlayerIdFromInput(playerAInput);
+        const playerBId = getPlayerIdFromInput(playerBInput);
+        
+        if (!playerAId || !playerBId || !matchDate) {
+            showMessage('error', 'Please fill in all fields.');
+            return;
+        }
+        
+        const winnerId = playerASets > playerBSets ? playerAId : playerBId;
+        
+        // Disable button during submission
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...';
+        
+        try {
+            const { data, error } = await db
+                .from('matches')
+                .insert([{
+                    season_id: 1,
+                    date: matchDate,
+                    player_a_id: playerAId,
+                    player_b_id: playerBId,
+                    player_a_sets: playerASets,
+                    player_b_sets: playerBSets,
+                    winner_id: winnerId
+                }])
+                .select();
+            
+            if (error) throw error;
+            
+            // Success! Clear form and refresh recent matches
+            showMessage('success', `✅ Match recorded: ${allPlayers[winnerId]} beat ${allPlayers[winnerId === playerAId ? playerBId : playerAId]} ${Math.max(playerASets, playerBSets)}-${Math.min(playerASets, playerBSets)}`);
+            
+            // Reset form
+            document.getElementById('playerA').value = '';
+            document.getElementById('playerB').value = '';
+            document.getElementById('playerASets').value = '0';
+            document.getElementById('playerBSets').value = '0';
+            document.getElementById('winnerPreview').classList.remove('show');
+            
+            // Reload recent matches
+            await loadRecentMatches();
+            
+        } catch (error) {
+            console.error('Error submitting match:', error);
+            
+            if (error.message && error.message.includes('duplicate')) {
+                showMessage('error', '❌ A match between these players on this date already exists.');
+            } else if (error.message && error.message.includes('policy')) {
+                showMessage('error', '❌ Permission denied. Please check RLS policies in Supabase.');
+            } else {
+                showMessage('error', `❌ Error: ${error.message || 'Failed to submit match.'}`);
+            }
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit Match';
+            updateWinnerPreview();
+        }
+    }
+    
+    // Delete match
+    async function deleteMatch(matchId, winnerName, loserName) {
+        if (!confirm(`Delete match: ${winnerName} vs ${loserName}?\n\nThis cannot be undone.`)) {
+            return;
+        }
+        
+        try {
+            const { error } = await db
+                .from('matches')
+                .delete()
+                .eq('id', matchId);
+            
+            if (error) throw error;
+            
+            showMessage('success', `🗑️ Match deleted successfully.`);
+            await loadRecentMatches();
+            
+        } catch (error) {
+            console.error('Error deleting match:', error);
+            
+            if (error.message && error.message.includes('policy')) {
+                showMessage('error', '❌ Permission denied. Please check RLS policies in Supabase.');
+            } else {
+                showMessage('error', `❌ Error: ${error.message || 'Failed to delete match.'}`);
+            }
+        }
+    }
+    
+    // Show message helper
+    function showMessage(type, text) {
+        const successEl = document.getElementById('successMessage');
+        const errorEl = document.getElementById('errorMessage');
+        
+        // Hide both first
+        successEl.classList.remove('success');
+        errorEl.classList.remove('error');
+        
+        if (type === 'success') {
+            successEl.textContent = text;
+            successEl.classList.add('success');
+            // Auto-hide after 5 seconds
+            setTimeout(() => successEl.classList.remove('success'), 5000);
+        } else {
+            errorEl.textContent = text;
+            errorEl.classList.add('error');
+            // Auto-hide after 8 seconds
+            setTimeout(() => errorEl.classList.remove('error'), 8000);
+        }
+        
+        // Scroll to top to see message
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>
